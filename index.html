@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <title>A Multiplayer Game</title>
+    <style>
+    	canvas {
+    		position : absolute;
+    		left : 0px;
+    		top : 0px;
+    	}
+
+    	.ui-element {
+    		border-radius: 25px;
+    		position : absolute;
+    		border-style: solid;
+    		background: white;
+    	}
+	</style>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div id="ui">
+    	<div class="ui-element" style="width: 150px; height: 150px; top: 25px; right: 25px;">
+    		<p>Points : {{ points }}</p>
+    		<p v-if="placeCapital">Click anywhere to place your capital</p>
+    	</div>
+    </div>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="/static/camera.js"></script>
+  <script src="/static/draw.js"></script>
+	<script src="/static/input.js"></script>
+	<script src="/static/game.js"></script>
+</html>
