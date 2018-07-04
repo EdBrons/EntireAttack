@@ -13,8 +13,8 @@ app.get('/', function(request, response){
   response.sendFile(path.join(__dirname, 'index.html'));
 });
 
-server.listen(5000, function(){
-  console.log('Starting server on port 5000');
+app.listen(process.env.PORT || 3000, function(){
+	console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
 });
 
 var players = {};
