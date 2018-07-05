@@ -103,6 +103,7 @@ io.on('connection', function(socket){
 	players[socket.id] = {
 		color : getColor(),
 		capital : false,
+		defeated : false,
 		points : 0,
 		income : 100
 	};
@@ -137,7 +138,7 @@ io.on('connection', function(socket){
 	});
 
 	socket.on("click", function(position){
-		if (tileMap.isInBounds(position) == false || !players[socket.id].capital){
+		if (tileMap.isInBounds(position) == false || players[socket.id].defeated){
 			//not valid position
 			return;
 		}
@@ -197,11 +198,10 @@ io.on('connection', function(socket){
 						return;
 					}
 
-					console.log("yes")
-
 					change(position, "capital", false);
 
-					players[socket.id].capital = false;
+					players[tile.factionId].capital = null;
+					players[tile.factionId].defeated = true;
 
 					//someones capital was taken
 
