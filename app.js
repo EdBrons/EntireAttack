@@ -105,7 +105,7 @@ io.on('connection', function(socket){
 		capital : false,
 		defeated : false,
 		points : 0,
-		income : 1
+		income : 50
 	};
 
 	io.emit("MapUpdate", {
