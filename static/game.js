@@ -27,27 +27,30 @@ socket.on("MapUpdate", function(data){
 });
 
 socket.on("Points", function(points){
-	for (var i in points){
-		if (points[i].factionId == factionId){
-			app.points = points[i].points;
-		}
-	}
+	players[factionId].points = points;
+	app.points = points;
 });
 
 //local simulation for points and decay
 var lastUpdateTime = (new Date).getTime();
-// var interval = setTimeout(helper, 1000 / 60);
+var interval = setTimeout(helper, 1000 / 60);
 function helper(){
 	var currentTime = (new Date).getTime();
 	Update(currentTime - lastUpdateTime);
 	lastUpdateTime = (new Date).getTime();
 	interval = setTimeout(helper, 1000 / 60);
 }
+
+var maxPoints = 1000;
+
 function Update(deltaTime){
 	var p = deltaTime / 1000;
 	for (var i in players){
 		var player = players[i];
 		player.points += player.income * p;
+		if (player.points > maxPoints){
+			player.points = maxPoints;
+		}
 	}
 	if (players != undefined){
 		app.points = Math.floor(players[factionId].points);

@@ -105,7 +105,7 @@ io.on('connection', function(socket){
 		capital : false,
 		defeated : false,
 		points : 0,
-		income : 100
+		income : 1
 	};
 
 	io.emit("MapUpdate", {
@@ -232,6 +232,8 @@ io.on('connection', function(socket){
 		}
 
 		players[socket.id].points -= points;
+
+		socket.emit("Points", players[socket.id].points);
 	});
 });
 
@@ -308,13 +310,13 @@ function Update(deltaTime){
 		}
 
 		// points.push(Math.floor(player.points));
-		points.push({
-			factionId : i,
-			points : Math.floor(player.points)
-		});
+		// points.push({
+		// 	factionId : i,
+		// 	points : Math.floor(player.points)
+		// });
 	}
 
-	io.emit("Points", points);
+	// io.emit("Points", points);
 }
 
 var update = true;
