@@ -7,7 +7,8 @@ var app = express();
 var server = http.Server(app);
 var io = socketIO(server);
 app.set('port', 5000);
-app.use('/static', express.static(__dirname + '/static'));
+// app.use('/static', express.static(__dirname + '/static'));
+app.use(express.static(path.join(__dirname, "js")));
 
 app.get('/', function(request, response){
   response.sendFile(path.join(__dirname, 'index.html'));
