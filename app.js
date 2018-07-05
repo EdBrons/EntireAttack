@@ -6,17 +6,24 @@ var socketIO = require('socket.io');
 var app = express();
 var server = http.Server(app);
 var io = socketIO(server);
-app.set('port', 5000);
-// app.use('/static', express.static(__dirname + '/static'));
-app.use(express.static(path.join(__dirname, "js")));
+
+var PORT = process.env.PORT || 3000;
+
+app.set('port', PORT);
+app.use('/static', express.static(__dirname + '/static'));
+
 
 app.get('/', function(request, response){
   response.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(process.env.PORT || 3000, function(){
+server.listen(PORT, function(){
 	console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
 });
+
+// server.listen(5000, function() {
+// 	console.log('Starting server on port 5000');
+// });
 
 var players = {};
 
