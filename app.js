@@ -188,7 +188,8 @@ io.on('connection', function(socket){
 		}
 
 
-		var points = Math.floor(players[socket.id].points) * neighbors;
+		var originalPoints = Math.floor(players[socket.id].points);
+		var points = originalPoints * neighbors;
 
 		//the click is valid, calculate result
 		if (tile.factionId == socket.id){
@@ -237,7 +238,7 @@ io.on('connection', function(socket){
 			}
 		}
 
-		players[socket.id].points -= points;
+		players[socket.id].points -= originalPoints;
 
 		socket.emit("Points", players[socket.id].points);
 	});
