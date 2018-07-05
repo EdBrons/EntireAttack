@@ -3,6 +3,7 @@ var Tile = function(position){
 	this.factionId = null;
 	this.capital = false;
 	this.points = 0;
+	this.connection = null;
 }
 
 // Tile.prototype.click = function(factionId, points){

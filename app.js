@@ -69,6 +69,12 @@ function getSpawnLocation(){
 
 var changedPositions = [];
 
+var decayingPositions = [];
+
+function distance(position1, position2){
+	return (Math.abs(position1.x - position2.x) + Math.abs(position1.y - position2.y));
+}
+
 // function changeOwnership(position, newFactionId){
 // 	tileMap.tile(position).factionId = newFactionId;
 // 	changedPositions.push(position);
@@ -182,7 +188,7 @@ io.on('connection', function(socket){
 		}
 
 
-		var points = Math.floor(players[socket.id].points)
+		var points = Math.floor(players[socket.id].points) * neighbors;
 
 		//the click is valid, calculate result
 		if (tile.factionId == socket.id){
