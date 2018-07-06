@@ -7,23 +7,19 @@
     		left : 0px;
     		top : 0px;
     	}
-
-    	.ui-element {
-    		border-radius: 25px;
-    		position : absolute;
-    		border-style: solid;
-    		background: white;
-    	}
 	</style>
     <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
-    <canvas id="canvas"></canvas>
-    <div id="ui">
-    	<div class="ui-element" style="width: 150px; height: 150px; top: 25px; right: 25px;">
-    		<p>Points : {{ points }}</p>
-    		<p v-if="placeCapital">Click anywhere to place your capital</p>
-    	</div>
+		<div id="signDiv">
+			By creating an account you create an empire in game
+			Username<input id="signDiv-username">
+			Password<input id="signDiv-password">
+			<button id="signDiv-signIn">Sign In</button>
+			<button id="signDiv-signUp">Sign Up</button>
+		</div>
+    <div id="gameDiv" style="display : none">
+			<canvas id="canvas"></canvas>
     </div>
   </body>
   <script src="https://cdn.jsdelivr.net/npm/vue"></script>

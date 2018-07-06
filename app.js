@@ -37,7 +37,10 @@ var colors = [
 	"#DBFF33",
 	"#75FF33",
 	"#33FFBD",
-	"#641E16"
+	"#641E16",
+	"#F00000",
+	"#00F000",
+	"#0000F0",
 ];
 function getColor(){
 	var i = Math.floor(Math.random() * colors.length);
@@ -97,14 +100,54 @@ function change(position, property, newValue){
 	changedPositions.push(position);
 }
 
+var Users = {};
+
+function isValidPassword(data){
+	if (Users[data.username] == undefined){
+		return false;
+	}
+	if (Users[data.username].password == data.password){
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
+function isValidUsername(data){
+	return Users[data.username] === undefined;
+}
+
+function addAccount(data){
+	Users[data.username] = {
+		password : data.password,
+	};
+}
 io.on('connection', function(socket){
 	console.log(socket.id + " connected");
 
-	// var capital = getSpawnLocation();
-	// if (capital == null){
-	// 	//no free spots available
-	// 	socket.emit("noFreeSpots");
-	// }
+	socket.on("signIn", function(data){
+		if (isValidPassword(data)){
+			socket.emit("signInResponse", {success : true});
+			socket.factionId = Users[data.username].factionId;
+		}
+		else{
+			socket.emit("signInResponse", {success : false});
+		}
+	});
+
+	socket.on("signUp", function(data){
+		if (isValidUsername(data)){
+			addAccount(data);
+			Users[data.username].factionId = socket.id;
+			console.log(Users[data.username].factionId);
+			console.log(socket.id);
+			socket.emit("signUpResponse", {success : true, factionId : Users[data.username].factionId});
+		}
+		else{
+			socket.emit("signUpResponse", {success : false});
+		}
+	})
 
 	players[socket.id] = {
 		color : getColor(),
@@ -114,55 +157,45 @@ io.on('connection', function(socket){
 		income : 50
 	};
 
-	io.emit("MapUpdate", {
-		tileMap : tileMap,
-		players : players
-	});
+	// socket.on("disconnect", function(){
+	// 	console.log(socket.id + " disconnected");
+	// 	colors.push(players[socket.id].color);
+	// 	delete players[socket.id];
 
-	socket.on("disconnect", function(){
-		console.log(socket.id + " disconnected");
-		colors.push(players[socket.id].color);
-		delete players[socket.id];
+	// 	//remove player
+	// 	for (var x = 0; x < tileMap.width; x++){
+	// 		for (var y = 0; y < tileMap.height; y++){
+	// 			var tile = tileMap.tile({x : x, y : y});
+	// 			if (tile.factionId == socket.id){
+	// 				change({x : x, y : y}, "factionId", null);
+	// 				change({x : x, y : y}, "points", 0);
+	// 			}
+	// 		}
+	// 	}
 
-		//remove player
-		for (var x = 0; x < tileMap.width; x++){
-			for (var y = 0; y < tileMap.height; y++){
-				var tile = tileMap.tile({x : x, y : y});
-				if (tile.factionId == socket.id){
-					change({x : x, y : y}, "factionId", null);
-					change({x : x, y : y}, "points", 0);
-				}
-			}
-		}
-
-		console.log("Player disconnected")
-
-		io.emit("MapUpdate", {
-			tileMap : tileMap,
-			players : players
-		});
-	});
+	// 	console.log("Player disconnected");
+	// });
 
 	socket.on("click", function(position){
-		if (tileMap.isInBounds(position) == false || players[socket.id].defeated){
+		if (tileMap.isInBounds(position) == false || players[socket.factionId].defeated){
 			//not valid position
 			return;
 		}
 
 		var tile = tileMap.tile(position);
 
-		if (players[socket.id].capital == false){
+		if (players[socket.factionId].capital == false){
 			//player has not yet chosen a capital
 			if (tile.factionId != null){
 				//cannot set capital to an occupied tile
 				return;
 			}
 
-			players[socket.id].capital = tile;
+			players[socket.factionId].capital = tile;
 			tile.capital = true;
 			change(position, "capital", true);
 			// tile.factionId = socket.id;
-			change(position, "factionId", socket.id);
+			change(position, "factionId", socket.factionId);
 			// tile.points = 100;
 			change(position, "points", 100);
 
@@ -176,23 +209,23 @@ io.on('connection', function(socket){
 		var neighbors = 0;
 		var hasNeighbors = false;
 		for (var i in adjacents){
-			if (adjacents[i].factionId == socket.id){
+			if (adjacents[i].factionId == socket.factionId){
 				hasNeighbors = true;
 				neighbors++;
 			}
 		}
 
 
-		if (!hasNeighbors && (tile.factionId != socket.id)){
+		if (!hasNeighbors && (tile.factionId != socket.factionId)){
 			return;
 		}
 
 
-		var originalPoints = Math.floor(players[socket.id].points);
+		var originalPoints = Math.floor(players[socket.factionId].points);
 		var points = originalPoints * neighbors;
 
 		//the click is valid, calculate result
-		if (tile.factionId == socket.id){
+		if (tile.factionId == socket.factionId){
 			// tile.points += points;
 			change(position, "points", tile.points + points);
 		}
@@ -224,11 +257,11 @@ io.on('connection', function(socket){
 					}
 
 					defeated.forEach((t) => {
-						change(t.position, "factionId", socket.id);
+						change(t.position, "factionId", socket.factionId);
 					})
 				}
 				// tile.factionId = socket.id;
-				change(position, "factionId", socket.id);
+				change(position, "factionId", socket.factionId);
 				// tile.points = points - tile.points;
 				change(position, "points", points - tile.points);
 			}
@@ -238,52 +271,11 @@ io.on('connection', function(socket){
 			}
 		}
 
-		players[socket.id].points -= originalPoints;
+		players[socket.factionId].points -= originalPoints;
 
-		socket.emit("Points", players[socket.id].points);
+		socket.emit("Points", players[socket.factionId].points);
 	});
 });
-
-// //things that are continuisly(?) update
-// var lastUpdateTime = (new Date()).getTime();
-// setInterval(function(){
-// 	var currentTime = (new Date()).getTime();
-// 	var deltaTime = currentTime - lastUpdateTime;
-// 	//how many ticks have gone by
-// 	var p = deltaTime / 1000;
-
-// 	//points go up
-// 	for (var i in players){
-// 		players[i].points += players[i].income * p;
-// 	}
-// }, 1000 / 20); //20 times / second
-
-
-// //sends tiles that have been changed to clients
-// setInterval(function(){
-// 	if (changedPositions.length <= 0){
-// 		return;
-// 	}
-// 	var tiles = [];
-// 	changedPositions.forEach((position) => {
-// 		tiles.push(tileMap.tile(position));
-// 	});
-// 	io.emit("tilesUpdate", tiles);
-// 	changedPositions = [];
-// }, 1000 / 20) //20 times / second
-
-// //sends entire map to make sure everyone is in sync
-
-// //exact points will only be known on the server,
-// //clients will run their own simulations which will be updated at full updates
-// //and when the tile dies or when points are spent
-// //maybe sync points but tile points cannot be synced because it would slow everything too much
-// setInterval(function(){
-// 	io.emit("fullUpdate", {
-// 		tileMap : tileMap,
-// 		players : players
-// 	});
-// }, 5000); //1 / 5 mintues
 
 var maxPoints = 1000;
 
